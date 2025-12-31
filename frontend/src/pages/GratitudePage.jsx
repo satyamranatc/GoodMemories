@@ -116,27 +116,27 @@ const GratitudePage = () => {
         </div>
       </div>
 
-      <div className="max-w-3xl mx-auto px-6 pt-32 pb-24">
-        <div className="text-center space-y-2 mb-12 fade-in">
-          <p className="text-sm font-medium tracking-widest text-gray-400 uppercase">
+      <div className="max-w-3xl mx-auto px-4 md:px-6 pt-24 md:pt-32 pb-16 md:pb-24">
+        <div className="text-center space-y-2 mb-10 md:mb-12 fade-in">
+          <p className="text-xs md:text-sm font-medium tracking-widest text-gray-400 uppercase">
             A message for
           </p>
-          <h1 className="text-5xl md:text-7xl font-serif text-gray-900 leading-tight">
+          <h1 className="text-4xl md:text-5xl lg:text-7xl font-serif text-gray-900 leading-tight px-4">
             {data.lovedOneName}
           </h1>
           {data.nickname && (
-            <p className="text-xl text-rose-400 font-serif italic">
+            <p className="text-lg md:text-xl text-rose-400 font-serif italic">
               "{data.nickname}"
             </p>
           )}
         </div>
 
-        <div className="bg-white p-8 md:p-12 rounded-[2rem] shadow-sm mb-12 relative overflow-hidden group">
+        <div className="bg-white p-6 md:p-12 rounded-3xl md:rounded-4xl shadow-sm mb-10 md:mb-12 relative overflow-hidden group">
           <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-rose-200 to-teal-200"></div>
-          <p className="text-xl md:text-2xl leading-relaxed text-gray-700 whitespace-pre-wrap font-serif">
+          <p className="text-lg md:text-xl lg:text-2xl leading-relaxed text-gray-700 whitespace-pre-wrap font-serif pl-2 md:pl-0">
             "{data.message}"
           </p>
-          <div className="mt-8 flex justify-end">
+          <div className="mt-6 md:mt-8 flex justify-end">
             <span className="text-sm text-gray-400 font-medium">
               — {data.creatorName}
             </span>
@@ -145,7 +145,7 @@ const GratitudePage = () => {
 
         {data.photos && data.photos.length > 0 && (
           <div
-            className={`grid gap-4 mb-16 ${
+            className={`grid gap-3 md:gap-4 mb-12 md:mb-16 ${
               data.photos.length === 1
                 ? "grid-cols-1"
                 : "grid-cols-2 md:grid-cols-3"
@@ -167,23 +167,25 @@ const GratitudePage = () => {
         )}
 
         {data.wishes && (
-          <div className="text-center mb-20 max-w-xl mx-auto">
+          <div className="text-center mb-16 md:mb-20 max-w-xl mx-auto px-4">
             <p className="text-gray-400 uppercase tracking-widest text-xs mb-4">
               Wishes for the future
             </p>
-            <p className="text-lg text-gray-600 italic">"{data.wishes}"</p>
+            <p className="text-base md:text-lg text-gray-600 italic">
+              "{data.wishes}"
+            </p>
           </div>
         )}
 
         {/* Feedback Section */}
-        <div className="border-t border-gray-200 pt-16">
-          <h3 className="text-2xl font-serif text-center mb-8">
+        <div className="border-t border-gray-200 pt-12 md:pt-16">
+          <h3 className="text-xl md:text-2xl font-serif text-center mb-6 md:mb-8">
             Send a Whisper Back
           </h3>
 
-          <div className="bg-gray-50 p-2 rounded-2xl flex gap-2 mb-8">
+          <div className="bg-gray-50 p-2 rounded-2xl flex gap-2 mb-6 md:mb-8">
             <input
-              className="flex-1 bg-transparent border-none px-4 py-3 focus:outline-none"
+              className="flex-1 bg-transparent border-none px-3 md:px-4 py-3 focus:outline-none text-base"
               placeholder="Say something nice..."
               value={newFeedback.message}
               onChange={(e) =>
@@ -191,7 +193,7 @@ const GratitudePage = () => {
               }
             />
             <select
-              className="bg-transparent border-none focus:outline-none"
+              className="bg-transparent border-none focus:outline-none text-xl md:text-2xl touch-manipulation"
               value={newFeedback.emoji}
               onChange={(e) =>
                 setNewFeedback({ ...newFeedback, emoji: e.target.value })
@@ -205,7 +207,7 @@ const GratitudePage = () => {
             </select>
             <button
               onClick={handleFeedbackSubmit}
-              className="bg-white shadow-sm px-6 rounded-xl font-medium hover:bg-gray-100 transition-colors"
+              className="bg-white shadow-sm px-4 md:px-6 rounded-xl font-medium hover:bg-gray-100 active:bg-gray-200 transition-colors touch-manipulation"
             >
               Send
             </button>
@@ -215,13 +217,13 @@ const GratitudePage = () => {
             {feedback.map((f) => (
               <div
                 key={f._id}
-                className="flex gap-4 items-start animate-in fade-in slide-in-from-bottom-2"
+                className="flex gap-3 md:gap-4 items-start animate-in fade-in slide-in-from-bottom-2"
               >
-                <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center text-xl shadow-sm">
+                <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center text-lg md:text-xl shadow-sm flex-shrink-0">
                   {f.emoji}
                 </div>
                 <div className="bg-white p-4 rounded-xl rounded-tl-none shadow-sm flex-1">
-                  <p className="text-gray-700">{f.message}</p>
+                  <p className="text-gray-700 text-base">{f.message}</p>
                   <p className="text-xs text-gray-400 mt-2 text-right">
                     {new Date(f.createdAt).toLocaleTimeString([], {
                       hour: "2-digit",
@@ -234,11 +236,11 @@ const GratitudePage = () => {
           </div>
         </div>
 
-        <div className="mt-24 text-center space-y-4">
+        <div className="mt-16 md:mt-24 text-center space-y-4">
           <p className="text-gray-400 text-sm">Feeling moved?</p>
           <Link
             to="/create"
-            className="inline-flex items-center gap-2 bg-rose-50 text-rose-600 px-6 py-3 rounded-full font-medium hover:bg-rose-100 transition-colors"
+            className="inline-flex items-center gap-2 bg-rose-50 text-rose-600 px-6 py-3 rounded-full font-medium hover:bg-rose-100 active:bg-rose-200 transition-colors touch-manipulation"
           >
             Create one for someone else <CornerDownRight size={16} />
           </Link>
