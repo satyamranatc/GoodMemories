@@ -1,15 +1,133 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo, memo } from "react";
 import { useParams, Link } from "react-router-dom";
 import axios from "axios";
-import { Clock, Share2, CornerDownRight, Heart } from "lucide-react";
+import { Clock, Share2, Check, CornerDownRight, Heart } from "lucide-react";
 import Navbar from "../components/Navbar";
+
+// Memoized countdown timer component to prevent parent re-renders
+const CountdownTimer = memo(({ createdAt }) => {
+  const [timeLeft, setTimeLeft] = useState("");
+  const [isExpired, setIsExpired] = useState(false);
+
+  useEffect(() => {
+    const created = new Date(createdAt).getTime();
+    const expires = created + 24 * 60 * 60 * 1000;
+
+    const timer = setInterval(() => {
+      const now = new Date().getTime();
+      const distance = expires - now;
+
+      if (distance < 0) {
+        clearInterval(timer);
+        setTimeLeft("EXPIRED");
+        setIsExpired(true);
+      } else {
+        const hours = Math.floor(
+          (distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
+        );
+        const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+        setTimeLeft(`${hours}h ${minutes}m ${seconds}s`);
+      }
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [createdAt]);
+
+  return (
+    <div className="bg-black/5 backdrop-blur-md px-4 py-1.5 rounded-full text-xs font-mono text-gray-600 flex items-center gap-2">
+      <Clock size={12} /> Disappears in {timeLeft}
+    </div>
+  );
+});
+
+CountdownTimer.displayName = "CountdownTimer";
+
+// Memoized feedback item to prevent re-renders
+const FeedbackItem = memo(({ feedback }) => (
+  <div className="flex gap-3 md:gap-4 items-start animate-in fade-in slide-in-from-bottom-2">
+    <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center text-lg md:text-xl shadow-sm flex-shrink-0">
+      {feedback.emoji}
+    </div>
+    <div className="bg-white p-4 rounded-xl rounded-tl-none shadow-sm flex-1">
+      <p className="text-gray-700 text-base">{feedback.message}</p>
+      <p className="text-xs text-gray-400 mt-2 text-right">
+        {new Date(feedback.createdAt).toLocaleTimeString([], {
+          hour: "2-digit",
+          minute: "2-digit",
+        })}
+      </p>
+    </div>
+  </div>
+));
+
+FeedbackItem.displayName = "FeedbackItem";
+
+// Share button component with copy-to-clipboard functionality
+const ShareButton = memo(({ pageId }) => {
+  const [copied, setCopied] = useState(false);
+
+  const shareUrl = useMemo(() => {
+    return `${window.location.origin}/view/${pageId}`;
+  }, [pageId]);
+
+  const handleShare = async () => {
+    try {
+      // Try modern clipboard API first
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        await navigator.clipboard.writeText(shareUrl);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      } else {
+        // Fallback for older browsers
+        const textArea = document.createElement("textarea");
+        textArea.value = shareUrl;
+        textArea.style.position = "fixed";
+        textArea.style.left = "-999999px";
+        document.body.appendChild(textArea);
+        textArea.select();
+        try {
+          document.execCommand("copy");
+          setCopied(true);
+          setTimeout(() => setCopied(false), 2000);
+        } catch (err) {
+          console.error("Failed to copy:", err);
+        }
+        document.body.removeChild(textArea);
+      }
+    } catch (err) {
+      console.error("Failed to copy link:", err);
+    }
+  };
+
+  return (
+    <button
+      onClick={handleShare}
+      className="bg-black/5 backdrop-blur-md px-4 py-1.5 rounded-full text-xs font-medium text-gray-600 hover:bg-black/10 active:bg-black/15 transition-all flex items-center gap-2 touch-manipulation"
+      aria-label="Share page link"
+    >
+      {copied ? (
+        <>
+          <Check size={14} className="text-green-600" />
+          <span className="text-green-600">Copied!</span>
+        </>
+      ) : (
+        <>
+          <Share2 size={14} />
+          <span>Share</span>
+        </>
+      )}
+    </button>
+  );
+});
+
+ShareButton.displayName = "ShareButton";
 
 const GratitudePage = () => {
   const { pageId } = useParams();
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [timeLeft, setTimeLeft] = useState("");
 
   // Feedback State
   const [feedback, setFeedback] = useState([]);
@@ -29,32 +147,6 @@ const GratitudePage = () => {
         );
         setData(res.data.page);
         setFeedback(res.data.feedback);
-
-        // Calculate Time Left
-        const created = new Date(res.data.page.createdAt).getTime();
-        const expires = created + 24 * 60 * 60 * 1000;
-
-        const timer = setInterval(() => {
-          const now = new Date().getTime();
-          const distance = expires - now;
-
-          if (distance < 0) {
-            clearInterval(timer);
-            setTimeLeft("EXPIRED");
-            setError("This page has faded away.");
-          } else {
-            const hours = Math.floor(
-              (distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
-            );
-            const minutes = Math.floor(
-              (distance % (1000 * 60 * 60)) / (1000 * 60)
-            );
-            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
-            setTimeLeft(`${hours}h ${minutes}m ${seconds}s`);
-          }
-        }, 1000);
-
-        return () => clearInterval(timer);
       } catch (err) {
         setError("This page does not exist or has already faded away.");
       } finally {
@@ -111,8 +203,9 @@ const GratitudePage = () => {
         >
           <Heart size={20} />
         </Link>
-        <div className="bg-black/5 backdrop-blur-md px-4 py-1.5 rounded-full text-xs font-mono text-gray-600 flex items-center gap-2">
-          <Clock size={12} /> Disappears in {timeLeft}
+        <div className="flex items-center gap-3">
+          <CountdownTimer createdAt={data.createdAt} />
+          <ShareButton pageId={pageId} />
         </div>
       </div>
 
@@ -160,6 +253,7 @@ const GratitudePage = () => {
                   src={photo}
                   alt="Memory"
                   className="w-full h-full object-cover"
+                  loading="lazy"
                 />
               </div>
             ))}
@@ -215,23 +309,7 @@ const GratitudePage = () => {
 
           <div className="space-y-4">
             {feedback.map((f) => (
-              <div
-                key={f._id}
-                className="flex gap-3 md:gap-4 items-start animate-in fade-in slide-in-from-bottom-2"
-              >
-                <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center text-lg md:text-xl shadow-sm flex-shrink-0">
-                  {f.emoji}
-                </div>
-                <div className="bg-white p-4 rounded-xl rounded-tl-none shadow-sm flex-1">
-                  <p className="text-gray-700 text-base">{f.message}</p>
-                  <p className="text-xs text-gray-400 mt-2 text-right">
-                    {new Date(f.createdAt).toLocaleTimeString([], {
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })}
-                  </p>
-                </div>
-              </div>
+              <FeedbackItem key={f._id} feedback={f} />
             ))}
           </div>
         </div>

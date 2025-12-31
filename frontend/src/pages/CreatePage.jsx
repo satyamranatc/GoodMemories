@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import {
@@ -23,15 +23,26 @@ const CreatePage = () => {
   });
   const [preview, setPreview] = useState([]);
 
+  // Cleanup object URLs to prevent memory leaks
+  useEffect(() => {
+    return () => {
+      preview.forEach((url) => URL.revokeObjectURL(url));
+    };
+  }, [preview]);
+
   const handleInputChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
   const handleFileChange = (e) => {
     const files = Array.from(e.target.files);
+
+    // Revoke old preview URLs before creating new ones
+    preview.forEach((url) => URL.revokeObjectURL(url));
+
     setFormData({ ...formData, photos: files });
 
-    // Create previews
+    // Create new previews
     const newPreviews = files.map((file) => URL.createObjectURL(file));
     setPreview(newPreviews);
   };
@@ -77,6 +88,18 @@ const CreatePage = () => {
     }
     setStep(step + 1);
   };
+
+  // Memoize preview rendering to avoid unnecessary re-renders
+  const previewImages = useMemo(() => {
+    return preview.map((src, i) => (
+      <div
+        key={i}
+        className="aspect-square relative rounded-xl overflow-hidden border border-gray-100"
+      >
+        <img src={src} alt="preview" className="w-full h-full object-cover" />
+      </div>
+    ));
+  }, [preview]);
 
   return (
     <div className="min-h-screen bg-[#FDFBF7]">
@@ -195,18 +218,7 @@ const CreatePage = () => {
                   Upload Photos (Max 5)
                 </label>
                 <div className="grid grid-cols-3 gap-2 md:gap-3">
-                  {preview.map((src, i) => (
-                    <div
-                      key={i}
-                      className="aspect-square relative rounded-xl overflow-hidden border border-gray-100"
-                    >
-                      <img
-                        src={src}
-                        alt="preview"
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                  ))}
+                  {previewImages}
                   {preview.length < 5 && (
                     <label className="aspect-square flex flex-col items-center justify-center bg-gray-50 rounded-xl border-2 border-dashed border-gray-200 cursor-pointer hover:bg-gray-100 active:bg-gray-200 transition-colors text-gray-400 hover:text-gray-600 touch-manipulation">
                       <ImageIcon size={20} className="md:w-6 md:h-6" />
