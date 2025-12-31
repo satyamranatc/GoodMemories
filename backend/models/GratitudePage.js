@@ -46,6 +46,9 @@ const gratitudePageSchema = new mongoose.Schema({
   },
 });
 
+// Index for faster lookups
+gratitudePageSchema.index({ pageId: 1 });
+
 const GratitudePage = mongoose.model("GratitudePage", gratitudePageSchema);
 
 export default GratitudePage;

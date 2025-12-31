@@ -10,7 +10,7 @@ const Navbar = () => {
           <Heart size={16} fill="currentColor" />
         </div>
         <span className="font-serif font-bold text-xl tracking-tight text-gray-800">
-          OurMemory
+          PureThanks
         </span>
       </Link>
     </nav>

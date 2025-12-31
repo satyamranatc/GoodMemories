@@ -37,14 +37,16 @@ export const createPage = async (req, res) => {
 // @access  Public
 export const getPage = async (req, res) => {
   try {
-    const page = await GratitudePage.findOne({ pageId: req.params.pageId });
+    const page = await GratitudePage.findOne({ pageId: req.params.pageId }).lean();
 
     if (!page) {
       return res.status(404).json({ message: 'Page not found or expired' });
     }
 
     // Fetch associated feedback
-    const feedback = await Feedback.find({ pageUniqueId: req.params.pageId }).sort({ createdAt: -1 });
+    const feedback = await Feedback.find({ pageUniqueId: req.params.pageId })
+      .sort({ createdAt: -1 })
+      .lean();
 
     res.json({ page, feedback });
   } catch (error) {

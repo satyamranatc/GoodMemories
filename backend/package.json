@@ -1,5 +1,5 @@
 {
-  "name": ".-backend",
+  "name": "purethanks-backend",
   "version": "1.0.0",
   "type": "module",
   "main": "server.js",
@@ -10,9 +10,12 @@
   },
   "dependencies": {
     "cloudinary": "^1.41.3",
+    "compression": "^1.8.1",
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",
     "express": "^5.2.1",
+    "express-rate-limit": "^8.2.1",
+    "helmet": "^8.1.0",
     "mongoose": "^9.1.1",
     "multer": "^2.0.2",
     "multer-storage-cloudinary": "^4.0.0",

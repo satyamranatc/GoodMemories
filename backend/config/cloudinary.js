@@ -18,7 +18,11 @@ const storage = new CloudinaryStorage({
   params: {
     folder: 'ourmemory',
     allowed_formats: ['jpg', 'png', 'jpeg', 'webp'],
-    transformation: [{ width: 1000, crop: "limit" }], // Optimize images
+    transformation: [
+      { width: 1000, crop: "limit" },
+      { quality: "auto:good" }, // Automatic quality optimization
+      { fetch_format: "auto" }  // Serve WebP when supported
+    ],
   },
 });
 
